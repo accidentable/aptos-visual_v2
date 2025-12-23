@@ -1,0 +1,5 @@
+{
+  "name": "Aptos Tx Journey",
+  "description": "An interactive visualization of the Aptos transaction lifecycle, highlighting its speed and parallel execution capabilities.",
+  "requestFramePermissions": []
+}
