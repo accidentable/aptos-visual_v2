@@ -191,13 +191,19 @@ const GUIDE_MESSAGES: Record<number | string, { ko: string; en: string }> = {
   }
 };
 
-const TransactionJourney: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
+const TransactionJourney: React.FC<{ onBack?: () => void; theme?: Theme; setTheme?: (theme: Theme) => void; lang?: Language; setLang?: (lang: Language) => void }> = ({ onBack, theme: initialTheme = 'dark', setTheme: setParentTheme, lang: initialLang = 'ko', setLang: setParentLang }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [lang, setLang] = useState<Language>('ko');
-  const [theme, setTheme] = useState<Theme>('light');
+  const [localLang, setLocalLang] = useState<Language>('ko');
+  const [localTheme, setLocalTheme] = useState<Theme>('dark');
   const [isStepComplete, setIsStepComplete] = useState(false);
   const [showGuide, setShowGuide] = useState(true);
   const [quorumPhase, setQuorumPhase] = useState<'PACKING' | 'PROPAGATION'>('PACKING');
+
+  // Use parent props if available, otherwise use local state
+  const lang = setParentLang ? initialLang : localLang;
+  const setLang = setParentLang || setLocalLang;
+  const theme = setParentTheme ? initialTheme : localTheme;
+  const setTheme = setParentTheme || setLocalTheme;
 
   const nextStep = () => {
     setCurrentStep(prev => Math.min(prev + 1, 5));
@@ -445,7 +451,7 @@ const TransactionJourney: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
           <p className={`text-xs font-mono ${isDark ? 'text-slate-500' : 'text-gray-600'}`}>
             Built by <span className={`font-semibold ${isDark ? 'text-slate-300' : 'text-gray-900'}`}>
               <a href="https://x.com/taeho35858" target="_blank" rel="noopener noreferrer" className="hover:text-teal-500 transition-colors">@Ray</a>
-            </span> <span className={isDark ? 'text-slate-700' : 'text-gray-400'}>Aptos Visualization</span>
+            </span> <span className={isDark ? 'text-slate-700' : 'text-gray-400'}>Aptos</span>
           </p>
         </div>
       </div>
