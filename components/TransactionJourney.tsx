@@ -172,10 +172,18 @@ threads.map(|t| {
   }
 ];
 
-const GUIDE_MESSAGES: Record<number, { ko: string; en: string }> = {
+const GUIDE_MESSAGES: Record<number | string, { ko: string; en: string }> = {
   1: {
     ko: "TX_INIT: 영수증 카드를 확인하고 서명하여 트랜잭션을 네트워크에 전송하십시오. 시스템이 즉시 보안 검사를 수행합니다.",
     en: "TX_INIT: Verify the receipt card and sign it to submit. The system will immediately perform security checks."
+  },
+  "2-PACKING": {
+    ko: "QUORUM_STORE: 가장 밝고 큰 트랜잭션(높은 수수료)을 골라 하단 슬롯 영역으로 드래그하세요. 배치가 완성되면 밸리데이터 전파가 시작됩니다.",
+    en: "QUORUM_STORE: Pick the brightest and largest transactions (highest fees) and drag them into the slots below. Propagation starts once the batch is full."
+  },
+  "2-PROPAGATION": {
+    ko: "배치 전파: 중앙의 배치를 밸리데이터에 드래그하여 가용성 증명(PoA)을 수집하세요. 정족수(2/3 이상)를 달성해야 데이터 가용성이 확보됩니다.",
+    en: "BATCH_PROPAGATION: Drag the batch to validators to collect Proof of Availability (PoA). Achieve 2/3+ quorum to secure data availability."
   },
   2: {
     ko: "QUORUM_STORE: 가장 밝고 큰 트랜잭션(높은 수수료)을 골라 하단 슬롯 영역으로 드래그하세요. 배치가 완성되면 밸리데이터 전파가 시작됩니다.",
@@ -195,12 +203,13 @@ const GUIDE_MESSAGES: Record<number, { ko: string; en: string }> = {
   }
 };
 
-const TransactionJourney: React.FC = () => {
+const TransactionJourney: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [lang, setLang] = useState<Language>('ko');
   const [theme, setTheme] = useState<Theme>('light');
   const [isStepComplete, setIsStepComplete] = useState(false);
   const [showGuide, setShowGuide] = useState(true);
+  const [quorumPhase, setQuorumPhase] = useState<'PACKING' | 'PROPAGATION'>('PACKING');
 
   const nextStep = () => {
     setCurrentStep(prev => Math.min(prev + 1, 5));
@@ -221,7 +230,34 @@ const TransactionJourney: React.FC = () => {
   const isDark = theme === 'dark';
 
   return (
-    <div className={`flex flex-col h-screen overflow-hidden transition-colors duration-300 border-4 m-2 
+    <div className={`flex flex-col h-screen overflow-hidden transition-colors duration-300 
+      ${isDark ? 'bg-slate-950 text-slate-100' : 'bg-white text-slate-900'}`}>
+      
+      {/* Top Header with Back Button */}
+      <div className={`border-b-2 px-6 py-3 shrink-0 transition-colors duration-300 ${isDark ? 'border-slate-700 bg-slate-900' : 'border-slate-200 bg-gray-50'}`}>
+        <div className=" w-full flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {onBack && (
+              <button
+                onClick={onBack}
+                className={`flex items-center gap-2 px-1 py-1 border transition-colors text-[11px] font-bold uppercase tracking-wide
+                  ${isDark ? 'border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-slate-200' : 'border-gray-300 hover:bg-gray-100 text-gray-600 hover:text-gray-900'}`}
+              >
+                <ArrowLeft size={14} />
+                BACK
+              </button>
+            )}
+            <h2 className={`text-lg font-bold tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              Aptos Transaction Journey
+            </h2>
+          </div>
+          <p className={`text-[10px] font-mono uppercase tracking-wider ${isDark ? 'text-slate-500' : 'text-gray-500'}`}>
+            Interactive Architecture Visualization
+          </p>
+        </div>
+      </div>
+      
+      <div className={`flex flex-col h-screen overflow-hidden transition-colors duration-300 border-4 m-2 
       ${isDark ? 'bg-slate-950 text-slate-100 border-slate-700' : 'bg-white text-slate-900 border-slate-900'}`}>
       
       {/* Header */}
@@ -238,10 +274,15 @@ const TransactionJourney: React.FC = () => {
              {isDark ? <Sun size={14} className="text-teal-500" /> : <Moon size={14} className="text-slate-300" />}
              <span className="text-[10px] font-mono text-slate-300 uppercase">{theme}</span>
            </button>
-           <button onClick={() => setLang(lang === 'ko' ? 'en' : 'ko')} className="flex items-center gap-2 border border-slate-700 px-3 py-1 hover:bg-slate-800 transition-colors">
-             <Globe size={14} className="text-slate-300" />
-             <span className="text-[10px] font-mono text-slate-300 uppercase">{lang}</span>
-           </button>
+           <div className="flex items-center gap-1 border border-slate-700 px-1 py-1">
+             <button onClick={() => setLang('ko')} className={`px-2 py-0.5 text-[10px] font-mono font-bold transition-colors ${lang === 'ko' ? 'bg-teal-500 text-slate-900' : 'text-slate-400 hover:text-slate-200'}`}>
+               KO
+             </button>
+             <div className="w-px h-4 bg-slate-700"></div>
+             <button onClick={() => setLang('en')} className={`px-2 py-0.5 text-[10px] font-mono font-bold transition-colors ${lang === 'en' ? 'bg-teal-500 text-slate-900' : 'text-slate-400 hover:text-slate-200'}`}>
+               EN
+             </button>
+           </div>
            <div className="hidden md:flex items-center gap-2 border border-slate-700 px-3 py-1">
               <div className="h-1.5 w-1.5 bg-teal-500"></div>
               <span className="text-[10px] font-mono text-slate-300 uppercase">SYS: ACTIVE</span>
@@ -287,7 +328,7 @@ const TransactionJourney: React.FC = () => {
             <AnimatePresence mode="wait">
               <motion.div key={currentStep + lang} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className="w-full h-full flex items-center justify-center">
                 {currentStep === 1 && <AdmissionControlActivity isDark={isDark} lang={lang} onComplete={() => setIsStepComplete(true)} />}
-                {currentStep === 2 && <QuorumStoreActivity isDark={isDark} lang={lang} onComplete={() => setIsStepComplete(true)} />}
+                {currentStep === 2 && <QuorumStoreActivity isDark={isDark} lang={lang} onComplete={() => setIsStepComplete(true)} onPhaseChange={setQuorumPhase} />}
                 {currentStep === 3 && <ConsensusActivity isDark={isDark} lang={lang} onComplete={() => setIsStepComplete(true)} />}
                 {currentStep === 4 && <BlockSTMActivity isDark={isDark} lang={lang} onComplete={() => setIsStepComplete(true)} />}
                 {currentStep === 5 && <CommitActivity isDark={isDark} lang={lang} onComplete={() => setIsStepComplete(true)} />}
@@ -325,7 +366,7 @@ const TransactionJourney: React.FC = () => {
                       <span className="text-[8px] font-black text-white uppercase tracking-widest">SYSTEM_GUIDE</span>
                     </div>
                     <p className={`text-[10px] font-mono font-bold leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                      {GUIDE_MESSAGES[currentStep][lang]}
+                      {currentStep === 2 ? GUIDE_MESSAGES[`2-${quorumPhase}`][lang] : GUIDE_MESSAGES[currentStep][lang]}
                     </p>
                     <button 
                       onClick={() => setShowGuide(false)}
@@ -408,6 +449,18 @@ const TransactionJourney: React.FC = () => {
           animation: bounce-x 1s infinite;
         }
       `}</style>
+      </div>
+
+      {/* Bottom Footer */}
+      <div className={`border-t-2 px-6 py-3 shrink-0 transition-colors duration-300 ${isDark ? 'border-slate-700 bg-slate-900' : 'border-slate-200 bg-gray-50'}`}>
+        <div className="max-w-7xl mx-auto flex items-center justify-center text-center gap-4">
+          <p className={`text-xs font-mono ${isDark ? 'text-slate-500' : 'text-gray-600'}`}>
+            Built by <span className={`font-semibold ${isDark ? 'text-slate-300' : 'text-gray-900'}`}>
+              <a href="https://x.com/taeho35858" target="_blank" rel="noopener noreferrer" className="hover:text-teal-500 transition-colors">@Ray</a>
+            </span> <span className={isDark ? 'text-slate-700' : 'text-gray-400'}>Aptos Visualization</span>
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
@@ -482,11 +535,99 @@ const MempoolAccumulator = ({ isDark, lang, newUserTx }: { isDark: boolean; lang
 
 // --- Step 1 Activity ---
 const AdmissionControlActivity = ({ isDark, lang, onComplete }: { isDark: boolean; lang: Language; onComplete: () => void }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [subStep, setSubStep] = useState<'A' | 'B'>('A');
   const [isSigned, setIsSigned] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [signatureImage, setSignatureImage] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [checklist, setChecklist] = useState({ sig: false, seq: false, bal: false });
   const [isCompressed, setIsCompressed] = useState(false);
+
+  // Canvas 초기화
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.width = 280;
+      canvas.height = 80;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = isDark ? '#1e293b' : '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+  }, [isDark]);
+
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    setIsDrawing(true);
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      ctx.beginPath();
+      ctx.moveTo((e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY);
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = isDark ? '#d1d5db' : '#1f2937';
+    }
+  };
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      ctx.lineTo((e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY);
+      ctx.stroke();
+    }
+  };
+
+  const stopDrawing = () => {
+    if (!isDrawing) return;
+    setIsDrawing(false);
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.closePath();
+        // 캔버스에 그림이 있는지 확인
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        let hasDrawing = false;
+        for (let i = 3; i < data.length; i += 4) {
+          if (data[i] > 128) {
+            hasDrawing = true;
+            break;
+          }
+        }
+        if (hasDrawing) {
+          setIsSigned(true);
+          setSignatureImage(canvas.toDataURL());
+        }
+      }
+    }
+  };
+
+  const clearSignature = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = isDark ? '#1e293b' : '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        setIsSigned(false);
+        setSignatureImage(null);
+      }
+    }
+  };
 
   useEffect(() => {
     if (subStep === 'B' && !isCompressed) {
@@ -507,19 +648,61 @@ const AdmissionControlActivity = ({ isDark, lang, onComplete }: { isDark: boolea
     <div className="flex flex-col items-center justify-center w-full h-full gap-8 relative">
       <AnimatePresence mode="wait">
         {!isCompressed && (
-          <motion.div key="receipt-container" exit={{ scale: 0.8, opacity: 0, y: 50 }} className="flex flex-col md:flex-row items-center justify-center gap-12 w-full">
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`w-64 border-4 p-6 relative overflow-hidden transition-colors ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-900'} ${isSigned ? 'shadow-[8px_8px_0px_0px_rgba(20,184,166,1)]' : 'shadow-[12px_12px_0px_0px_rgba(15,23,42,1)]'}`}>
-              <div className="border-b-2 border-dashed border-slate-400 pb-4 mb-4"><h3 className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 mb-4"><Zap size={14} className="text-teal-500" /> {t.receipt}</h3><div className="space-y-3 font-mono text-[9px]"><div className="flex justify-between"><span className="text-slate-500">{t.sender}</span><span className="font-bold">0x4a...1d3e</span></div><div className="flex justify-between"><span className="text-slate-500">{t.receiver}</span><span className="font-bold">0x1b...9c2a</span></div><div className="flex justify-between"><span className="text-slate-500">{t.amount}</span><span className="font-bold">1,000 APT</span></div><div className="flex justify-between"><span className="text-slate-500">{t.gas}</span><span className="font-bold">2,000 UNIT</span></div></div></div>
-              <div className="h-20 flex items-center justify-center relative">
-                {!isSigned ? <button onClick={() => setIsSigned(true)} className="flex flex-col items-center gap-1 group cursor-pointer"><PenTool size={24} className="text-slate-400 group-hover:text-teal-500 transition-colors" /><span className="text-[8px] font-black uppercase text-slate-400">{t.sign}</span></button> : <motion.div initial={{ scale: 2, opacity: 0, rotate: -20 }} animate={{ scale: 1, opacity: 1, rotate: -15 }} className="border-4 border-teal-500 px-4 py-1 text-teal-500 font-black text-xs uppercase tracking-tighter">{t.certified}</motion.div>}
+          <motion.div key="receipt-container" exit={{ scale: 0.8, opacity: 0, y: 50 }} className="flex flex-col md:flex-row items-center justify-center gap-8 w-full">
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`w-64 border-4 p-6 relative overflow-hidden transition-colors ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-900'} shadow-[12px_12px_0px_0px_rgba(15,23,42,1)]`}>
+              {/* Receipt Header */}
+              <div className="border-b-2 border-dashed border-slate-400 pb-4 mb-6">
+                <h3 className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 mb-4"><Zap size={14} className="text-teal-500" /> {t.receipt}</h3>
+                <div className="space-y-3 font-mono text-[9px]">
+                  <div className="flex justify-between"><span className="text-slate-500">{t.sender}</span><span className="font-bold">0x4a...1d3e</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">{t.receiver}</span><span className="font-bold">0x1b...9c2a</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">{t.amount}</span><span className="font-bold">1,000 APT</span></div>
+                  <div className="flex justify-between"><span className="text-slate-500">{t.gas}</span><span className="font-bold">2,000 UNIT</span></div>
+                </div>
               </div>
+
+              {/* Signature Pad */}
+              <div className="border-b-2 border-dashed border-slate-400 pb-6 mb-6">
+                <label className={`block text-[9px] font-black uppercase tracking-widest mb-4 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                  {lang === 'ko' ? '서명 (마우스로 그리세요)' : 'SIGNATURE (DRAW WITH MOUSE)'}
+                </label>
+                <div className={`border-2 relative mb-3 ${isDark ? 'border-slate-700' : 'border-slate-300'}`}>
+                  <canvas
+                    ref={canvasRef}
+                    onMouseDown={startDrawing}
+                    onMouseMove={draw}
+                    onMouseUp={stopDrawing}
+                    onMouseLeave={stopDrawing}
+                    className={`block w-full cursor-crosshair ${isDark ? 'bg-slate-900' : 'bg-white'}`}
+                    style={{ height: '80px', display: 'block' }}
+                  />
+                </div>
+                {isSigned && (
+                  <button
+                    onClick={clearSignature}
+                    className={`text-[8px] font-black uppercase tracking-widest transition-colors ${isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-600 hover:text-slate-900'}`}
+                  >
+                    {lang === 'ko' ? '지우기' : 'CLEAR'}
+                  </button>
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <button
+                disabled={!isSigned || subStep === 'B'}
+                onClick={() => setSubStep('B')}
+                className={`w-full py-3 border-2 font-black text-[10px] uppercase tracking-widest transition-all ${isDark ? 'border-slate-700' : 'border-slate-900'} ${isSigned && subStep === 'A' ? 'bg-slate-900 text-white shadow-[4px_4px_0px_0px_rgba(20,184,166,1)] active:translate-x-1 active:translate-y-1 active:shadow-none' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}
+              >
+                {subStep === 'B' ? (lang === 'ko' ? '검증 진행 중...' : 'VERIFYING...') : (lang === 'ko' ? '제출하기' : 'SUBMIT')}
+              </button>
               {isScanning && <motion.div animate={{ top: ['0%', '100%', '0%'] }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }} className="absolute left-0 w-full h-1 bg-teal-400 shadow-[0_0_15px_rgba(45,212,191,0.8)] z-20" />}
             </motion.div>
-            {isSigned && (
+
+            {/* Verification Checklist - Shows after submission on the right */}
+            {subStep === 'B' && (
               <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className={`w-72 border-2 p-6 transition-colors ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-900 shadow-[6px_6px_0px_0px_rgba(15,23,42,1)]'}`}>
                 <div className="flex items-center gap-2 mb-6 border-b-2 pb-2 border-slate-400"><Shield size={16} /><span className="text-[10px] font-black uppercase tracking-widest">{t.checklist}</span></div>
                 <div className="space-y-4">{(['sig', 'seq', 'bal'] as const).map(key => (<div key={key} className="flex items-center justify-between font-mono text-[9px] font-bold"><span className={checklist[key] ? 'text-teal-500' : 'text-slate-400'}>{key === 'sig' ? t.ver_sig : key === 'seq' ? t.ver_seq : t.ver_bal}</span>{checklist[key] ? <CheckCircle2 size={14} className="text-teal-500" /> : <div className={`w-3.5 h-3.5 border ${isDark ? 'border-slate-700' : 'border-slate-400'}`} />}</div>))}</div>
-                <button disabled={!isSigned || subStep === 'B'} onClick={() => setSubStep('B')} className={`w-full mt-8 py-3 border-2 font-black text-[10px] uppercase tracking-widest transition-all ${isDark ? 'border-slate-700' : 'border-slate-900'} ${subStep === 'A' ? 'bg-slate-900 text-white shadow-[4px_4px_0px_0px_rgba(20,184,166,1)] active:translate-x-1 active:translate-y-1 active:shadow-none' : 'bg-slate-800 text-slate-600'}`}>{subStep === 'A' ? (lang === 'ko' ? '검증 시작' : 'START_VERIFY') : t.mempool}</button>
               </motion.div>
             )}
           </motion.div>
@@ -544,7 +727,7 @@ interface PackableTX {
   y: number;
 }
 
-const QuorumStoreActivity = ({ isDark, lang, onComplete }: { isDark: boolean; lang: Language; onComplete: () => void }) => {
+const QuorumStoreActivity = ({ isDark, lang, onComplete, onPhaseChange }: { isDark: boolean; lang: Language; onComplete: () => void; onPhaseChange?: (phase: 'PACKING' | 'PROPAGATION') => void }) => {
   const [phase, setPhase] = useState<'PACKING' | 'PROPAGATION'>('PACKING');
   const [mempoolTx, setMempoolTx] = useState<PackableTX[]>([]);
   const [slots, setSlots] = useState<(PackableTX | null)[]>([null, null, null]);
@@ -569,8 +752,8 @@ const QuorumStoreActivity = ({ isDark, lang, onComplete }: { isDark: boolean; la
         id: i,
         fee: Math.floor(Math.random() * 800) + 200, 
         size: 0,
-        x: Math.random() * 320 - 160,
-        y: Math.random() * 80 - 240,
+        x: Math.random() * 380 - 190,
+        y: Math.random() < 0.5 ? (Math.random() * 100 - 175) : (Math.random() * 100 + 75),
       })).map(tx => ({ ...tx, size: 28 + (tx.fee / 1000) * 32 }));
       setMempoolTx(initialTx);
     }
@@ -586,6 +769,11 @@ const QuorumStoreActivity = ({ isDark, lang, onComplete }: { isDark: boolean; la
       }, 1500);
     }
   }, [slots, phase, isMerging]);
+
+  // Notify parent about phase change
+  useEffect(() => {
+    onPhaseChange?.(phase);
+  }, [phase, onPhaseChange]);
 
   // Quorum Achievement check
   useEffect(() => {
@@ -682,12 +870,12 @@ const QuorumStoreActivity = ({ isDark, lang, onComplete }: { isDark: boolean; la
         )}
       </AnimatePresence>
 
-      <div className="text-center space-y-1 mb-4">
+      <div className="absolute top-4 left-4 space-y-1">
         <h3 className={`text-sm font-black uppercase tracking-[0.2em] ${isDark ? 'text-teal-500' : 'text-slate-900'}`}>
           {phase === 'PACKING' ? t.packing_title : t.prop_title}
         </h3>
         {phase === 'PACKING' && (
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-start">
             <span className="text-[10px] font-mono font-bold text-slate-500 uppercase">{t.packing_reward}</span>
             <div className="text-2xl font-black text-amber-500 flex items-center gap-2">
               <Coins size={20} />
@@ -706,7 +894,7 @@ const QuorumStoreActivity = ({ isDark, lang, onComplete }: { isDark: boolean; la
                   key={tx.id}
                   layout
                   drag
-                  dragConstraints={{ left: -200, right: 200, top: -300, bottom: 200 }}
+                  dragConstraints={{ left: -220, right: 220, top: -190, bottom: 190 }}
                   onDrag={handleDragToGrid}
                   onDragEnd={(e, info) => handleDragEndToSlot(e, info, tx)}
                   initial={{ opacity: 0, scale: 0 }}
@@ -729,7 +917,7 @@ const QuorumStoreActivity = ({ isDark, lang, onComplete }: { isDark: boolean; la
               ))}
             </AnimatePresence>
 
-            <div className={`mt-44 w-[340px] h-36 border-4 border-dashed relative flex items-center justify-center gap-4 transition-all duration-300
+            <div className={`mt-35 w-[340px] h-36 border-4 border-dashed relative flex items-center justify-center gap-4 transition-all duration-300
               ${isHoveringGrid ? 'border-teal-500 bg-teal-500/10 scale-105' : (isDark ? 'border-slate-800 bg-slate-900/40' : 'border-slate-300 bg-slate-50')}
               ${isMerging ? 'scale-0 opacity-0' : 'opacity-1'}`}
             >
