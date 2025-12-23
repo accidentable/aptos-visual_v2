@@ -40,132 +40,120 @@ type Theme = 'light' | 'dark';
 const STEPS: StepData[] = [
   {
     id: 1,
-    title: { ko: "트랜잭션 서명 및 검증", en: "Transaction Signing & Verification" },
+    title: { ko: "입구 심사: 가짜인가 진짜인가?", en: "Security Check: Real or Fake?" },
     category: "ADMISSION_CONTROL",
-    shortDesc: "AUTH_VERIFICATION_PROTOCOL",
+    shortDesc: "IDENTITY_CHECK",
     blogContent: {
       overview: {
-        ko: "트랜잭션 여정은 사용자의 디지털 서명에서 시작됩니다. 네트워크는 이 서명이 유효한지, 중복된 요청은 아닌지, 수수료를 지불할 잔액이 충분한지 엄격하게 검사합니다.",
-        en: "The journey begins with the user's digital signature. The network strictly verifies if the signature is valid, ensures no duplicate requests, and checks for sufficient gas balance."
+        ko: "트랜잭션 여정의 첫 관문입니다. 마치 은행 창구에서 신분증을 확인하는 것과 같아요. 네트워크는 당신이 보낸 요청이 진짜인지, 잔액은 충분한지 꼼꼼히 검사합니다.",
+        en: "The first gateway of the journey. Think of it as showing your ID at a bank. The network checks if your request is genuine and if you have enough balance."
       },
       technicalDetails: {
         ko: [
-          "Ed25519 Signature: 위변조가 불가능한 고성능 암호학적 증명.",
-          "Sequence Number: 각 계정의 트랜잭션 순서를 보장하고 리플레이 공격 방어.",
-          "Stateless Verification: 네트워크 전체 합의 전, 개별 노드 레벨에서의 즉각적인 필터링."
+          "디지털 서명 확인: 당신이 직접 보낸 트랜잭션인지 확인합니다.",
+          "잔액 체크: 수수료를 지불할 수 있는지 미리 확인합니다.",
+          "중복 방지: 같은 요청이 두 번 처리되지 않도록 차단합니다."
         ],
         en: [
-          "Ed25519 Signature: Tamper-proof high-performance cryptographic proof.",
-          "Sequence Number: Guarantees transaction order per account and prevents replay attacks.",
-          "Stateless Verification: Immediate filtering at the node level before global consensus."
+          "Signature Check: Confirms the transaction actually came from you.",
+          "Balance Audit: Pre-verifies if you can afford the gas fees.",
+          "Replay Prevention: Blocks duplicate requests from being processed twice."
         ]
-      },
-      codeSnippet: `// SIGN_AND_VERIFY_LOGIC
-const signature = ed25519.sign(txn_payload, private_key);
-if (authenticator.verify(signature) && sender.sequence == txn.sequence) {
-  mempool.admit(txn);
-}`
+      }
     }
   },
   {
     id: 2,
-    title: { ko: "데이터 전파 및 증명", en: "Data Propagation & Proof" },
+    title: { ko: "데이터 포장: 택배 상자 만들기", en: "Data Packing: Making Delivery Boxes" },
     category: "QUORUM_STORE",
-    shortDesc: "BATCH_PROPAGATION_PROTOCOL",
+    shortDesc: "EFFICIENT_BATCHING",
     blogContent: {
       overview: {
-        ko: "수수료가 높은 트랜잭션을 선별하여 배치를 생성하고, 밸리데이터들에게 전파하여 가용성 증명(PoA)을 획득하십시오.",
-        en: "Select high-fee transactions to create a batch, then propagate it to validators to obtain Proof of Availability (PoA)."
+        ko: "개별 트랜잭션을 하나씩 보내는 건 비효율적이죠. 앱토스는 트랜잭션들을 커다란 '택배 상자(배치)'에 모아 포장합니다. 이렇게 하면 네트워크를 훨씬 더 넓게 쓸 수 있어요.",
+        en: "Sending transactions one by one is slow. Aptos packs multiple transactions into a 'Delivery Box' (batch). This allows the network to handle way more data at once."
       },
       technicalDetails: {
         ko: [
-          "Quorum Store: 합의와 데이터 실행을 분리하여 병목 현상을 해결.",
-          "PoA (Proof of Availability): 2/3 이상의 노드에 데이터가 안전하게 저장되었음을 보장.",
-          "Mempool Decoupling: 실제 데이터는 미리 전파하고 합의 시에는 메타데이터만 사용."
+          "쿼럼 스토어: 데이터를 미리 모아두어 정체를 방지합니다.",
+          "가용성 증명: '상자가 안전하게 도착했다'는 증명서를 미리 발행합니다.",
+          "병목 현상 해결: 데이터 전송과 결정을 분리하여 속도를 높입니다."
         ],
         en: [
-          "Quorum Store: Resolves bottlenecks by separating consensus and execution.",
-          "PoA (Proof of Availability): Ensures data is safely stored on 2/3+ of the nodes.",
-          "Mempool Decoupling: Propagates actual data early, using only metadata for consensus."
+          "Quorum Store: Pre-collects data to prevent network congestion.",
+          "Proof of Availability: Issues a certificate saying 'the box has arrived safely'.",
+          "Decoupling: Separates data transfer from decision-making for speed."
         ]
       }
     }
   },
   {
     id: 3,
-    title: { ko: "순서 합의", en: "Order Consensus" },
+    title: { ko: "순서 합의: 팀원들의 빠른 찬성", en: "Consensus: The Fast Vote" },
     category: "APTOS_BFT_CONSENSUS",
-    shortDesc: "METADATA_ORDERING_FINALITY",
+    shortDesc: "TEAM_AGREEMENT",
     blogContent: {
       overview: {
-        ko: "실제 데이터가 아닌 배치의 메타데이터(증명서) 순서에 대해서만 합의를 진행합니다. 이 분리 구조가 앱토스의 초고속 레이턴시를 가능케 합니다.",
-        en: "Consensus is reached only on the order of batch metadata (certificates), not the actual data. This separation enables Aptos' ultra-low latency."
+        ko: "이제 상자들의 순서를 정할 시간입니다. 앱토스는 내용물 전체가 아니라 '상자 라벨(메타데이터)'만 보고 투표하기 때문에 빛의 속도로 결정을 내립니다.",
+        en: "Time to decide the order of the boxes. Aptos votes on the 'Box Labels' (metadata) instead of the full content, allowing for light-speed decisions."
       },
       technicalDetails: {
         ko: [
-          "Jolteon-BFT: 리더 노드가 제안한 순서에 대해 밸리데이터들의 투표 수집.",
-          "Quorum Certificate: 2/3 이상의 동의를 얻어 블록의 순서를 최종 확정.",
-          "Low Overhead: 실제 페이로드를 옮기지 않아 합의 과정이 매우 가벼움."
+          "AptosBFT: 지연 시간을 최소화한 앱토스만의 초고속 합의 엔진입니다.",
+          "메타데이터 합의: 가벼운 정보만 주고받아 네트워크 부담을 줄입니다.",
+          "2/3 정족수: 밸리데이터의 2/3 이상이 찬성하면 즉시 확정됩니다."
         ],
         en: [
-          "Jolteon-BFT: Collects validator votes on the order proposed by the leader node.",
-          "Quorum Certificate: Finalizes block order with 2/3+ majority agreement.",
-          "Low Overhead: Extremely lightweight as no actual payloads are moved during consensus."
+          "AptosBFT: A specialized high-speed engine designed for minimal latency.",
+          "Metadata Ordering: Only exchanges light info to reduce network load.",
+          "2/3 Quorum: Finalizes instantly once 2/3 of validators agree."
         ]
       }
     }
   },
   {
     id: 4,
-    title: { ko: "병렬 실행", en: "Parallel Execution" },
+    title: { ko: "병렬 실행: 여러 명의 셰프", en: "Parallel Execution: Multiple Chefs" },
     category: "BLOCK_STM_ENGINE",
-    shortDesc: "OPTIMISTIC_PARALLEL_EXEC",
+    shortDesc: "MULTI_TASKING",
     blogContent: {
       overview: {
-        ko: "앱토스 기술의 정수입니다. 트랜잭션을 하나씩 처리하지 않고, 의존성이 없는 작업들을 여러 쓰레드에서 동시에 처리하여 폭발적인 TPS를 달성합니다.",
-        en: "The core of Aptos technology. Instead of sequential processing, non-conflicting tasks are processed simultaneously across multiple threads for massive TPS."
+        ko: "앱토스 마법의 핵심입니다! 한 명의 셰프가 요리를 하나씩 만드는 게 아니라, 여러 명의 셰프가 서로 방해되지 않는 요리를 동시에 완성하여 엄청난 속도를 냅니다.",
+        en: "The secret sauce of Aptos! Instead of one chef making one dish at a time, multiple chefs finish non-conflicting dishes simultaneously for explosive speed."
       },
       technicalDetails: {
         ko: [
-          "Optimistic Execution: 충돌이 없을 것이라 가정하고 우선 병렬 처리.",
-          "Dynamic Dependency: 실행 중 충돌 발생 시 해당 트랜잭션만 즉시 재실행.",
-          "State Transition: 하드웨어 코어 수에 비례하여 성능이 확장되는 구조."
+          "Block-STM: 관련 없는 작업들을 똑똑하게 골라내어 동시에 실행합니다.",
+          "낙관적 처리: 일단 다 같이 처리한 뒤, 충돌이 나면 그 부분만 다시 합니다.",
+          "무한 확장성: 컴퓨터 사양이 좋을수록 처리 속도가 비약적으로 상승합니다."
         ],
         en: [
-          "Optimistic Execution: Parallel processing assumes no conflicts initially.",
-          "Dynamic Dependency: Only conflicting transactions are re-executed immediately.",
-          "State Transition: Performance scales linearly with the number of hardware cores."
+          "Block-STM: Smarter engine that processes independent tasks at once.",
+          "Optimistic Execution: Runs everything first, then re-dos only conflicts.",
+          "Scalability: Speed increases linearly as hardware gets stronger."
         ]
-      },
-      codeSnippet: `// BLOCK_STM_PARALLEL_TASK
-threads.map(|t| {
-  while let Some(txn) = scheduler.pop() {
-    t.execute_optimistic(txn);
-    if conflict_detected() { t.abort_and_requeue(); }
-  }
-});`
+      }
     }
   },
   {
     id: 5,
-    title: { ko: "최종 기록 및 확정", en: "Final Commitment & Settlement" },
+    title: { ko: "최종 기록: 장부에 박제하기", en: "Final Record: Locking the Ledger" },
     category: "LEDGER_COMMIT",
-    shortDesc: "STATE_STORAGE_UPDATE",
+    shortDesc: "PERMANENT_SETTLEMENT",
     blogContent: {
       overview: {
-        ko: "실행 결과가 검증되고 원장에 영구적으로 기록됩니다. 사용자의 지갑 잔액이 실제로 업데이트되며 트랜잭션의 긴 여정이 마무리됩니다.",
-        en: "Execution results are verified and permanently recorded on the ledger. User balances are updated, concluding the transaction journey."
+        ko: "모든 과정이 끝났습니다! 실행된 결과가 앱토스라는 거대한 디지털 장부에 영구적으로 기록됩니다. 이제 당신의 지갑 잔액이 실제로 업데이트되었습니다.",
+        en: "The journey is complete! The results are permanently etched into the massive Aptos digital ledger. Your wallet balance is now officially updated."
       },
       technicalDetails: {
         ko: [
-          "State Root Update: 머클 트리를 업데이트하여 새로운 전역 상태 생성.",
-          "Storage Service: 변경된 상태값을 데이터베이스(RocksDB)에 영구 기록.",
-          "Event Emission: 트랜잭션 완료 이벤트를 외부에 브로드캐스트."
+          "상태 업데이트: 전 세계가 공유하는 데이터베이스에 결과를 반영합니다.",
+          "영구 저장소: 절대 지워지지 않는 안전한 저장소(RocksDB)에 보관합니다.",
+          "알림 발송: 트랜잭션이 성공했음을 세상에 알립니다."
         ],
         en: [
-          "State Root Update: Updates the Merkle tree to create a new global state.",
-          "Storage Service: Permanently records state changes in the database (RocksDB).",
-          "Event Emission: Broadcasts transaction completion events externally."
+          "State Update: Reflects results in the globally shared database.",
+          "Permanent Storage: Stores data in an unerasable, secure vault (RocksDB).",
+          "Event Emission: Notifies the world that the transaction was successful."
         ]
       }
     }
@@ -411,14 +399,14 @@ const TransactionJourney: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
                 <div className="bg-slate-900 text-white text-[9px] font-black px-2 py-1 inline-block tracking-widest border border-slate-700">{STEPS[currentStep-1].shortDesc}</div>
               </div>
               <div className="space-y-6">
-                <p className={`text-sm font-medium leading-relaxed font-mono ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{STEPS[currentStep-1].blogContent.overview[lang]}</p>
+                <p className={`text-sm font-bold leading-relaxed font-mono ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{STEPS[currentStep-1].blogContent.overview[lang]}</p>
                 <div className={`border-2 p-6 transition-colors ${isDark ? 'border-slate-700 bg-slate-800/50' : 'border-slate-900 bg-slate-50'}`}>
                   <h3 className="font-black mb-4 flex items-center gap-2 text-[10px] uppercase tracking-widest">SYSTEM_ATTRIBUTES</h3>
                   <ul className="space-y-4">
                     {STEPS[currentStep-1].blogContent.technicalDetails[lang].map((detail, idx) => (
                       <li key={idx} className="flex gap-3 text-xs leading-tight">
                         <div className={`h-2 w-2 mt-1 shrink-0 ${isDark ? 'bg-teal-500' : 'bg-slate-900'}`}></div>
-                        <span className="font-medium">{detail}</span>
+                        <span className="font-bold">{detail}</span>
                       </li>
                     ))}
                   </ul>
@@ -987,38 +975,94 @@ const QuorumStoreActivity = ({ isDark, lang, onComplete, onPhaseChange }: { isDa
 // --- Activity 3: Consensus ---
 const ConsensusActivity = ({ isDark, lang, onComplete }: { isDark: boolean; lang: Language; onComplete: () => void }) => {
   const [voted, setVoted] = useState(0);
+  const [showFlash, setShowFlash] = useState(false);
   const total = 12;
   const quorum = 8;
 
   useEffect(() => {
-    if (voted >= quorum) {
-      onComplete();
+    if (voted >= quorum && !showFlash) {
+      setShowFlash(true);
+      setTimeout(() => setShowFlash(false), 500);
+      setTimeout(() => onComplete(), 800);
     }
-  }, [voted, onComplete]);
+  }, [voted, showFlash, onComplete]);
+
+  const isQuorumAchieved = voted >= quorum;
 
   return (
-    <div className="flex flex-col items-center gap-8 w-full max-w-md">
+    <div className="flex flex-col items-center gap-8 w-full max-w-md relative">
+      <AnimatePresence>
+        {showFlash && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 0.2 }} 
+            exit={{ opacity: 0 }} 
+            className="absolute inset-0 bg-teal-500 -m-20 z-0 pointer-events-none" 
+          />
+        )}
+      </AnimatePresence>
+
       <div className="relative h-48 w-48 flex items-center justify-center">
+        {/* Quorum Flash Ring */}
+        <AnimatePresence>
+          {showFlash && (
+            <motion.div 
+              initial={{ scale: 0.5, opacity: 1 }} 
+              animate={{ scale: 2, opacity: 0 }} 
+              exit={{ opacity: 0 }} 
+              transition={{ duration: 0.6 }} 
+              className="absolute inset-0 border-2 border-teal-500 rounded-full z-0" 
+            />
+          )}
+        </AnimatePresence>
+
         {Array.from({ length: total }).map((_, i) => {
           const angle = (i / total) * Math.PI * 2;
           const x = Math.cos(angle) * 80;
           const y = Math.sin(angle) * 80;
           return (
-            <motion.div key={i} initial={{ scale: 0 }} animate={{ scale: 1, x, y }} className={`absolute h-6 w-6 border-2 ${isDark ? 'border-slate-700' : 'border-slate-900'} ${i < voted ? 'bg-teal-500' : (isDark ? 'bg-slate-800' : 'bg-white')}`} />
+            <motion.div 
+              key={i} 
+              initial={{ scale: 0 }} 
+              animate={{ scale: 1, x, y }} 
+              className={`absolute h-6 w-6 border-2 transition-all ${isDark ? 'border-slate-700' : 'border-slate-900'} ${i < voted ? 'bg-teal-500 shadow-[0_0_12px_rgba(20,184,166,0.8)]' : (isDark ? 'bg-slate-800' : 'bg-white')}`} 
+            />
           );
         })}
-        <div className="h-12 w-12 bg-slate-900 border border-slate-700 flex items-center justify-center">
-           <Network size={20} className="text-teal-500" />
-        </div>
+        <motion.div 
+          animate={isQuorumAchieved ? { 
+            boxShadow: ['0 0 0px rgba(20,184,166,0)', '0 0 30px rgba(20,184,166,0.8)', '0 0 0px rgba(20,184,166,0)']
+          } : {}}
+          transition={{ duration: 0.6, repeat: isQuorumAchieved ? Infinity : 0 }}
+          className={`h-12 w-12 border-2 flex items-center justify-center transition-colors ${isQuorumAchieved ? 'bg-teal-500 border-teal-500' : 'bg-slate-900 border-slate-700'}`}
+        >
+           <Network size={20} className={isQuorumAchieved ? 'text-white' : 'text-teal-500'} />
+        </motion.div>
       </div>
-      <div className="w-full space-y-4">
-        <div className={`h-4 w-full border-2 relative ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-100 border-slate-900'}`}>
-          <motion.div animate={{ width: `${(voted / total) * 100}%` }} className={`h-full ${voted >= quorum ? 'bg-teal-500' : 'bg-slate-700'}`} />
-          <div className="absolute top-0 left-[66%] h-full w-0.5 bg-red-500"></div>
+      <div className="w-full space-y-4 relative z-10">
+        <div className={`h-4 w-full border-2 relative overflow-hidden transition-colors ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-100 border-slate-900'} ${isQuorumAchieved ? 'border-teal-500' : ''}`}>
+          <motion.div 
+            animate={{ width: `${(voted / total) * 100}%` }} 
+            transition={{ duration: 0.3 }}
+            className={`h-full transition-colors ${voted >= quorum ? 'bg-teal-500 shadow-[0_0_15px_rgba(20,184,166,0.8)]' : 'bg-slate-700'}`} 
+          />
+          <motion.div 
+            animate={isQuorumAchieved ? { opacity: [0.5, 1, 0.5] } : { opacity: 0.7 }}
+            transition={{ duration: 0.8, repeat: isQuorumAchieved ? Infinity : 0 }}
+            className="absolute top-0 left-[66%] h-full w-0.5 bg-red-500"
+          ></motion.div>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-[10px] font-black font-mono">VOTES: {voted}/{total} (REQ: {quorum})</span>
-          <button onClick={() => setVoted(prev => Math.min(prev + 1, total))} className="px-6 py-2 bg-slate-900 text-white font-black text-[10px] hover:bg-teal-600 shadow-[4px_4px_0px_0px_rgba(20,184,166,1)] border border-slate-700 uppercase">{lang === 'ko' ? '투표 수집' : 'COLLECT_VOTE'}</button>
+          <motion.button 
+            onClick={() => setVoted(prev => Math.min(prev + 1, total))} 
+            disabled={isQuorumAchieved}
+            whileHover={!isQuorumAchieved ? { scale: 1.05 } : {}}
+            whileTap={!isQuorumAchieved ? { scale: 0.95 } : {}}
+            className={`px-6 py-2 font-black text-[10px] border border-slate-700 uppercase transition-all ${isQuorumAchieved ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-slate-900 text-white hover:shadow-[4px_4px_0px_0px_rgba(20,184,166,1)] shadow-[4px_4px_0px_0px_rgba(20,184,166,0.5)]'}`}
+          >
+            {isQuorumAchieved ? (lang === 'ko' ? '합의 완료' : 'QUORUM_ACHIEVED') : (lang === 'ko' ? '투표 수집' : 'COLLECT_VOTE')}
+          </motion.button>
         </div>
       </div>
     </div>
@@ -1029,35 +1073,86 @@ const ConsensusActivity = ({ isDark, lang, onComplete }: { isDark: boolean; lang
 const BlockSTMActivity = ({ isDark, lang, onComplete }: { isDark: boolean; lang: Language; onComplete: () => void }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [cores, setCores] = useState(1);
+  const [txCount, setTxCount] = useState(0);
 
   const toggleProcessing = () => {
     setIsProcessing(!isProcessing);
-    if (!isProcessing) onComplete();
+    if (isProcessing) {
+      setTxCount(0);
+    }
+    if (!isProcessing) {
+      onComplete();
+    }
   };
 
+  // TPS 카운터
+  useEffect(() => {
+    if (!isProcessing) return;
+    
+    const baseRate = 50; // core 1일 때 기본 처리량
+    const rate = baseRate * cores;
+    
+    const interval = setInterval(() => {
+      setTxCount(prev => prev + rate);
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [isProcessing, cores]);
+
   return (
-    <div className="flex flex-col items-center gap-8 w-full max-w-lg">
-      <div className="grid grid-cols-1 gap-2 w-full">
-        {Array.from({ length: cores }).map((_, lane) => (
-          <div key={lane} className={`h-10 border-2 relative overflow-hidden flex items-center px-4 transition-colors ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-900'}`}>
-            <div className="flex gap-4">
-              {isProcessing && Array.from({length: 12}).map((_, tx) => (
-                <motion.div key={tx} animate={{ x: [-100, 500] }} transition={{ duration: 3 / cores, repeat: Infinity, delay: tx * 0.1, ease: "linear" }} className="h-4 w-12 bg-teal-500 border border-slate-900" />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className={`border-2 p-6 w-full shadow-[6px_6px_0px_0px_rgba(15,23,42,1)] flex items-center justify-between transition-colors ${isDark ? 'bg-slate-900 border-slate-700 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]' : 'bg-white border-slate-900'}`}>
-        <div className="space-y-2">
-          <p className="text-[10px] font-black font-mono uppercase">CORES: {cores}</p>
-          <div className="flex gap-1">
-            {[1, 2, 4, 8].map(n => (
-              <button key={n} onClick={() => setCores(n)} className={`h-6 w-8 text-[9px] font-bold border transition-colors ${cores === n ? 'bg-teal-500 text-slate-900 border-slate-900' : (isDark ? 'bg-slate-800 border-slate-700 text-slate-400' : 'bg-white border-slate-900 text-slate-900')}`}>x{n}</button>
+    <div className="flex flex-col items-center gap-8 w-full">
+      <div className="flex gap-8 w-full max-w-4xl">
+        {/* Transaction Processing Lanes */}
+        <div className="flex-1">
+          <div className="grid grid-cols-1 gap-2 w-full">
+            {Array.from({ length: cores }).map((_, lane) => (
+              <div key={lane} className={`h-10 border-2 relative overflow-hidden flex items-center px-4 transition-colors ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-900'}`}>
+                <div className="flex gap-4">
+                  {isProcessing && Array.from({length: 12}).map((_, tx) => (
+                    <motion.div key={tx} animate={{ x: [-100, 500] }} transition={{ duration: 3 / cores, repeat: Infinity, delay: tx * 0.1, ease: "linear" }} className="h-4 w-12 bg-teal-500 border border-slate-900" />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>
-        <button onClick={toggleProcessing} className={`px-8 py-3 font-black text-[10px] border-2 transition-colors uppercase ${isProcessing ? 'bg-red-500 text-white' : 'bg-teal-500 text-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]'} ${isDark ? 'border-slate-700' : 'border-slate-900'}`}>{isProcessing ? (lang === 'ko' ? '정지' : 'STOP') : (lang === 'ko' ? 'Block-STM 가동' : 'START_BLOCK_STM')}</button>
+
+        {/* Control Panel */}
+        <div className="flex-1">
+          <div className={`border-2 p-6 shadow-[6px_6px_0px_0px_rgba(15,23,42,1)] flex flex-col gap-4 transition-colors h-full ${isDark ? 'bg-slate-900 border-slate-700 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]' : 'bg-white border-slate-900'}`}>
+            {/* Core Selection */}
+            <div className="space-y-2">
+              <p className="text-[10px] font-black font-mono uppercase">CORES: {cores}</p>
+              <div className="flex gap-1">
+                {[1, 2, 4, 8].map(n => (
+                  <button key={n} onClick={() => setCores(n)} disabled={isProcessing} className={`h-6 w-8 text-[9px] font-bold border transition-colors ${cores === n ? 'bg-teal-500 text-slate-900 border-slate-900' : (isDark ? 'bg-slate-800 border-slate-700 text-slate-400' : 'bg-white border-slate-900 text-slate-900')} ${isProcessing ? 'cursor-not-allowed opacity-50' : ''}`}>x{n}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* TX Counter */}
+            <div className={`border-2 p-3 transition-colors ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-300'}`}>
+              <p className="text-[9px] font-black font-mono uppercase text-slate-500 mb-1">{lang === 'ko' ? '처리되는 트랜잭션 수' : 'PROCESSED_TRANSACTIONS'}</p>
+              <motion.p 
+                key={txCount}
+                initial={{ scale: 1.1 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.2 }}
+                className="text-2xl font-black text-teal-500"
+              >
+                {txCount.toLocaleString()}
+              </motion.p>
+              <p className="text-[8px] font-mono text-slate-500 mt-1">
+                {lang === 'ko' ? `TPS: ${50 * cores}` : `TPS: ${50 * cores}`}
+              </p>
+            </div>
+
+            {/* Start Button */}
+            <div className="flex justify-end">
+              <button onClick={toggleProcessing} className={`px-8 py-3 font-black text-[10px] border-2 transition-colors uppercase ${isProcessing ? 'bg-red-500 text-white' : 'bg-teal-500 text-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]'} ${isDark ? 'border-slate-700' : 'border-slate-900'}`}>{isProcessing ? (lang === 'ko' ? '정지' : 'STOP') : (lang === 'ko' ? 'Block-STM 가동' : 'START_BLOCK_STM')}</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1066,22 +1161,79 @@ const BlockSTMActivity = ({ isDark, lang, onComplete }: { isDark: boolean; lang:
 // --- Activity 5: Commit ---
 const CommitActivity = ({ isDark, lang, onComplete }: { isDark: boolean; lang: Language; onComplete: () => void }) => {
   const [isCommitted, setIsCommitted] = useState(false);
+  const [confetti, setConfetti] = useState<Array<{ id: number; x: number; y: number; delay: number }>>([]);
+
   const handleCommit = () => {
-    setIsCommitted(!isCommitted);
-    if (!isCommitted) onComplete();
-  }
+    if (!isCommitted) {
+      // 폭죽 생성 - 화면 전체에 분산
+      const newConfetti = Array.from({ length: 80 }).map((_, i) => ({
+        id: i,
+        x: Math.random() * 200 - 100,
+        y: Math.random() * 200 - 100,
+        startX: Math.random() * 100,
+        startY: Math.random() * 100,
+        delay: Math.random() * 0.3
+      }));
+      setConfetti(newConfetti);
+      setIsCommitted(true);
+      setTimeout(() => onComplete(), 1200);
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center gap-10">
+    <div className="flex flex-col items-center gap-10 relative overflow-hidden">
+      {/* Confetti */}
+      <AnimatePresence>
+        {confetti.map(c => (
+          <motion.div
+            key={c.id}
+            initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+            animate={{
+              x: c.x * 12,
+              y: c.y * 12,
+              opacity: 0,
+              scale: 0,
+              rotate: Math.random() * 720
+            }}
+            transition={{ duration: 1.2, delay: c.delay, ease: "easeOut" }}
+            className="fixed pointer-events-none"
+            style={{
+              left: `${c.startX}%`,
+              top: `${c.startY}%`,
+              marginLeft: "-10px",
+              marginTop: "-10px",
+              zIndex: 999
+            }}
+          >
+            <div className={`w-4 h-4 ${['bg-teal-500', 'bg-amber-500', 'bg-red-500', 'bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-pink-500'][c.id % 7]}`} />
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
       <div className={`border-4 p-12 transition-all duration-500 ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-900'} ${isCommitted ? 'shadow-[12px_12px_0px_0px_rgba(20,184,166,1)] scale-105' : 'shadow-[12px_12px_0px_0px_rgba(15,23,42,1)]'}`}>
         <div className="flex flex-col items-center gap-6">
-          <div className={`p-6 border-2 transition-colors ${isCommitted ? 'bg-teal-500' : (isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-900')}`}>{isCommitted ? <Lock size={48} /> : <Database size={48} />}</div>
+          <motion.div
+            animate={isCommitted ? { rotate: 360, scale: [1, 1.2, 1] } : {}}
+            transition={{ duration: 0.8 }}
+            className={`p-6 border-2 transition-colors ${isCommitted ? 'bg-teal-500 border-teal-500' : (isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-900')}`}
+          >
+            {isCommitted ? <Lock size={48} /> : <Database size={48} />}
+          </motion.div>
           <div className="text-center space-y-1">
             <h4 className="text-[12px] font-black font-mono uppercase">LEDGER_STATE_ROOT</h4>
             <p className="text-[10px] font-mono text-slate-500">0x8a2...3f1e9</p>
           </div>
         </div>
       </div>
-      <button onClick={handleCommit} className={`px-12 py-4 font-black text-[12px] border-2 transition-all uppercase tracking-[0.2em] ${isDark ? 'border-slate-700' : 'border-slate-900'} ${isCommitted ? 'bg-slate-800 text-slate-600' : 'bg-slate-100 text-slate-900 shadow-[6px_6px_0px_0px_rgba(20,184,166,1)]'}`}>{isCommitted ? (lang === 'ko' ? '기록 완료' : 'FINALIZED') : (lang === 'ko' ? '원장 기록' : 'COMMIT_TO_LEDGER')}</button>
+      <motion.button
+        onClick={handleCommit}
+        disabled={isCommitted}
+        whileHover={!isCommitted ? { scale: 1.05 } : {}}
+        whileTap={!isCommitted ? { scale: 0.95 } : {}}
+        className={`px-12 py-4 font-black text-[12px] border-2 transition-all uppercase tracking-[0.2em] ${isDark ? 'border-slate-700' : 'border-slate-900'} ${isCommitted ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-slate-100 text-slate-900 shadow-[6px_6px_0px_0px_rgba(20,184,166,1)] hover:shadow-[8px_8px_0px_0px_rgba(20,184,166,1)]'}`}
+      >
+        {isCommitted ? (lang === 'ko' ? '기록 완료' : 'FINALIZED') : (lang === 'ko' ? '원장 기록' : 'COMMIT_TO_LEDGER')}
+      </motion.button>
     </div>
   );
 };
